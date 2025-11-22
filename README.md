@@ -4,6 +4,11 @@ Interactive **airline loyalty** report built in Power BI, covering **Jan 2017 â€
 The focus is on **clean modeling**, **clear business KPIs**, and an **app-like UX** with drillthrough and tooltips.
 
 ---
+## ðŸ”— Report Access
+
+- **Live report:** [https://app.powerbi.com/view?r=eyJrIjoiMmVlM2ZlNTctYjU4MS00OTAxLTg4MmUtYWNkNjg1Y2Q3MGYzIiwidCI6ImIyZDQ1OTA3LTUwOWItNDQ5Ni05YmQzLTVhNjBjN2YwZjM4MCIsImMiOjN9]
+
+---
 
 ## **1. Overview**
 
