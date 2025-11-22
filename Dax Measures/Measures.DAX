@@ -1,0 +1,154 @@
+--------------------------------------------------
+-- Core measures
+--------------------------------------------------
+
+M_Total Flights Booked =
+    CALCULATE (
+        SUM ( 'Customer Flight Activity'[Total Flights] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Points Issued =
+    CALCULATE (
+        SUM ( 'Customer Flight Activity'[Points Accumulated] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Points Redeemed =
+    CALCULATE (
+        SUM ( 'Customer Flight Activity'[Points Redeemed] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Distance Traveled =
+    CALCULATE (
+        SUM ( 'Customer Flight Activity'[Distance] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Dollar Cost Points Redeemed =
+    CALCULATE (
+        SUM ( 'Customer Flight Activity'[Dollar Cost Points Redeemed] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Members =
+    CALCULATE (
+        DISTINCTCOUNT ( 'Customer Flight Activity'[Loyalty Number] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        )
+    );
+
+M_Total Loyalty Cancellations =
+    CALCULATE (
+        SUM ( 'Customer Loyalty History'[Has Canceled] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Loyalty History'[Cancellation Start of Month]
+        )
+    );
+
+M_Total CLV =
+    SUMX (
+        VALUES ( 'Customer Loyalty History'[Loyalty Number] ),
+        CALCULATE ( MAX ( 'Customer Loyalty History'[CLV] ) )
+    );
+
+
+--------------------------------------------------
+-- Ratios & derived member metrics
+--------------------------------------------------
+
+M_Redemption Rate =
+    DIVIDE ( [M_Total Points Redeemed], [M_Total Points Issued], 0 );
+
+M_Loyalty Member Enrollments =
+    [M_Total Members] - [M_Total Loyalty Cancellations];
+
+M_Net Loyalty Members =
+    [M_Loyalty Member Enrollments] - [M_Total Loyalty Cancellations];
+
+M_Members (Flew in Period) =
+    CALCULATE (
+        DISTINCTCOUNT ( 'Customer Flight Activity'[Loyalty Number] ),
+        USERELATIONSHIP (
+            'Calendar'[Date],
+            'Customer Flight Activity'[Flight Booked Start of Month]
+        ),
+        'Customer Flight Activity'[Total Flights] > 0
+    );
+
+M_Customer Average Salary =
+    AVERAGEX (
+        VALUES ( 'Customer Loyalty History'[Loyalty Number] ),
+        CALCULATE ( MAX ( 'Customer Loyalty History'[Salary] ) )
+    );
+
+
+--------------------------------------------------
+-- Time intelligence / YoY
+--------------------------------------------------
+
+M_Flights Booked YoY % =
+    VAR CY =
+        [M_Flights Booked CY]
+    VAR LY =
+        [M_Flights Booked LY]
+    RETURN
+        DIVIDE ( CY - LY, LY );
+
+M_Flights Booked YOY% Formatted =
+    "YOY: " & FORMAT ( [M_Flights Booked YoY %], "00%" );
+
+
+--------------------------------------------------
+-- Sparkline / advanced helpers
+--------------------------------------------------
+
+M_Loyal Members Sparkline =
+    VAR CurrentMonth =
+        MAX ( 'Calendar'[Start of Month] )
+    RETURN
+        CALCULATE (
+            DISTINCTCOUNT ( 'Customer Loyalty History'[Loyalty Number] ),
+            -- Ignore Calendar filters so we can look "back in time"
+            ALL ( 'Calendar' ),
+            FILTER (
+                'Customer Loyalty History',
+                'Customer Loyalty History'[Enrollment Start of Month] <= CurrentMonth
+                    && (
+                        ISBLANK ( 'Customer Loyalty History'[Cancellation Start of Month] )
+                            || 'Customer Loyalty History'[Cancellation Start of Month] > CurrentMonth
+                    )
+            )
+        );
+
+
+--------------------------------------------------
+-- Cosmetic / display helpers
+--------------------------------------------------
+
+M_Transparent =
+    "RGBA(255,255,255,0)";
+
+M_Date Selection =
+    FORMAT ( MIN ( 'Calendar'[Date] ), "MMM/YY" )
+        & " - "
+        & FORMAT ( MAX ( 'Calendar'[Date] ), "MMM/YY" );
