@@ -1,13 +1,44 @@
-# Model interpretation
+# Airline model explanation
 
-![Supplied Airline model](Schema.png)
+![Maven Airline model diagram](Schema.png)
 
-The diagram shows Customer Loyalty History on the one side of a one-to-many relationship to Customer Flight Activity, with filtering toward activity. Calendar connects to loyalty history through one solid and one dashed relationship and to activity through a dashed relationship. A disconnected Measures Table contains calculations.
+The model combines customer flight activity with loyalty-history attributes and a shared Calendar table. A separate Measures Table organizes the report's calculations.
 
-The exported activity measures name Calendar[Date] and Customer Flight Activity[Flight Booked Start of Month] in USERELATIONSHIP. The cancellation measure names Calendar[Date] and Customer Loyalty History[Cancellation Start of Month]. The exact active Calendar-to-history endpoint is not exposed by this screenshot; enrollment date is a hypothesis to verify, not a confirmed property.
+[Project overview](../README.md) · [Data dictionary](../Data_Dictionary.md) · [DAX documentation](../Dax%20Measures/README.md) · [Validation notes](../Docs/Validation.md)
 
-These date roles need explicit interpretation: activity month, enrollment month, cancellation month, and membership cutoff are different questions. Activating a date role must be tested against other active filtering paths. CLV has no date role explicitly selected in its expression, so its period interpretation depends on the model context.
+## Tables and reporting roles
 
-Before certifying the model, inspect relationship endpoints, cardinalities, active status and directions; test dimension uniqueness, unmatched fact keys, duplicate member-month records, and date coverage. The screenshot alone cannot explain the tier/headline discrepancy.
+| Table | Reporting role |
+|---|---|
+| Customer Flight Activity | Member-level activity by reporting month, including flights, distance, accumulated points, redeemed points, and redemption cost. |
+| Customer Loyalty History | Customer identifiers, geography, demographic attributes, loyalty tier, CLV, and membership dates. |
+| Calendar | Date attributes used for reporting selections, activity calculations, membership calculations, and date labels. |
+| Measures Table | Disconnected table used to organize DAX measures. |
 
-See [DAX review](../Dax%20Measures/README.md) and [validation record](../Docs/Validation.md).
+The intended activity-table grain is loyalty member × flight month. The intended customer-table grain is one record per Loyalty Number.
+
+These describe the intended model structure. Source-record uniqueness has not been independently verified against the complete dataset.
+
+## Relationships shown in the diagram
+
+The diagram shows:
+
+- An active one-to-many relationship from Customer Loyalty History to Customer Flight Activity, with filtering toward activity.
+- An active relationship from Calendar to Customer Loyalty History.
+- An inactive relationship from Calendar to Customer Loyalty History.
+- An inactive relationship from Calendar to Customer Flight Activity.
+- A disconnected Measures Table.
+
+The diagram does not expose the exact column endpoints of every relationship.
+
+The supplied DAX expressions identify the flight-month and cancellation-month relationships used by the measures. The endpoint of the active Calendar-to-history relationship is not confirmed by the available diagram.
+
+## Flight-activity date role
+
+The activity measures use:
+
+```dax
+USERELATIONSHIP(
+    'Calendar'[Date],
+    'Customer Flight Activity'[Flight Booked Start of Month]
+)

@@ -1,154 +1,225 @@
---------------------------------------------------
--- Core measures
---------------------------------------------------
+﻿// Maven Airline — DAX measures
+// 22 individual measure definitions.
+// Measure names and calculation logic match the supplied Power BI expressions.
+// This file is a reference collection, not a bulk-import script.
+
+
+// ============================================================
+// 1. Activity measures
+// ============================================================
 
 M_Total Flights Booked =
-    CALCULATE (
-        SUM ( 'Customer Flight Activity'[Total Flights] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
+CALCULATE(
+    SUM('Customer Flight Activity'[Total Flights]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
 
-M_Total Points Issued =
-    CALCULATE (
-        SUM ( 'Customer Flight Activity'[Points Accumulated] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
-
-M_Total Points Redeemed =
-    CALCULATE (
-        SUM ( 'Customer Flight Activity'[Points Redeemed] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
 
 M_Total Distance Traveled =
-    CALCULATE (
-        SUM ( 'Customer Flight Activity'[Distance] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
+CALCULATE(
+    SUM('Customer Flight Activity'[Distance]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
+
+
+M_Total Points Issued =
+CALCULATE(
+    SUM('Customer Flight Activity'[Points Accumulated]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
+
+
+M_Total Points Redeemed =
+CALCULATE(
+    SUM('Customer Flight Activity'[Points Redeemed]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
+
 
 M_Total Dollar Cost Points Redeemed =
-    CALCULATE (
-        SUM ( 'Customer Flight Activity'[Dollar Cost Points Redeemed] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
+CALCULATE(
+    SUM('Customer Flight Activity'[Dollar Cost Points Redeemed]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
+
+
+// ============================================================
+// 2. Membership measures
+// ============================================================
 
 M_Total Members =
-    CALCULATE (
-        DISTINCTCOUNT ( 'Customer Flight Activity'[Loyalty Number] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        )
-    );
+CALCULATE(
+    DISTINCTCOUNT('Customer Flight Activity'[Loyalty Number]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    )
+)
 
-M_Total Loyalty Cancellations =
-    CALCULATE (
-        SUM ( 'Customer Loyalty History'[Has Canceled] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Loyalty History'[Cancellation Start of Month]
-        )
-    );
-
-M_Total CLV =
-    SUMX (
-        VALUES ( 'Customer Loyalty History'[Loyalty Number] ),
-        CALCULATE ( MAX ( 'Customer Loyalty History'[CLV] ) )
-    );
-
-
---------------------------------------------------
--- Ratios & derived member metrics
---------------------------------------------------
-
-M_Redemption Rate =
-    DIVIDE ( [M_Total Points Redeemed], [M_Total Points Issued], 0 );
-
-M_Loyalty Member Enrollments =
-    [M_Total Members] - [M_Total Loyalty Cancellations];
-
-M_Net Loyalty Members =
-    [M_Loyalty Member Enrollments] - [M_Total Loyalty Cancellations];
 
 M_Members (Flew in Period) =
-    CALCULATE (
-        DISTINCTCOUNT ( 'Customer Flight Activity'[Loyalty Number] ),
-        USERELATIONSHIP (
-            'Calendar'[Date],
-            'Customer Flight Activity'[Flight Booked Start of Month]
-        ),
-        'Customer Flight Activity'[Total Flights] > 0
-    );
-
-M_Customer Average Salary =
-    AVERAGEX (
-        VALUES ( 'Customer Loyalty History'[Loyalty Number] ),
-        CALCULATE ( MAX ( 'Customer Loyalty History'[Salary] ) )
-    );
+CALCULATE(
+    DISTINCTCOUNT('Customer Flight Activity'[Loyalty Number]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Flight Activity'[Flight Booked Start of Month]
+    ),
+    'Customer Flight Activity'[Total Flights] > 0
+)
 
 
---------------------------------------------------
--- Time intelligence / YoY
---------------------------------------------------
-
-M_Flights Booked YoY % =
-    VAR CY =
-        [M_Flights Booked CY]
-    VAR LY =
-        [M_Flights Booked LY]
-    RETURN
-        DIVIDE ( CY - LY, LY );
-
-M_Flights Booked YOY% Formatted =
-    "YOY: " & FORMAT ( [M_Flights Booked YoY %], "00%" );
+M_Total Loyalty Cancellations =
+CALCULATE(
+    SUM('Customer Loyalty History'[Has Canceled]),
+    USERELATIONSHIP(
+        'Calendar'[Date],
+        'Customer Loyalty History'[Cancellation Start of Month]
+    )
+)
 
 
---------------------------------------------------
--- Sparkline / advanced helpers
---------------------------------------------------
+M_Loyalty Member Enrollments =
+[M_Total Members] - [M_Total Loyalty Cancellations]
+
+
+M_Net Loyalty Members =
+[M_Loyalty Member Enrollments] - [M_Total Loyalty Cancellations]
+
 
 M_Loyal Members Sparkline =
-    VAR CurrentMonth =
-        MAX ( 'Calendar'[Start of Month] )
-    RETURN
-        CALCULATE (
-            DISTINCTCOUNT ( 'Customer Loyalty History'[Loyalty Number] ),
-            -- Ignore Calendar filters so we can look "back in time"
-            ALL ( 'Calendar' ),
-            FILTER (
-                'Customer Loyalty History',
-                'Customer Loyalty History'[Enrollment Start of Month] <= CurrentMonth
-                    && (
-                        ISBLANK ( 'Customer Loyalty History'[Cancellation Start of Month] )
-                            || 'Customer Loyalty History'[Cancellation Start of Month] > CurrentMonth
+VAR CurrentMonth =
+    MAX('Calendar'[Start of Month])
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT('Customer Loyalty History'[Loyalty Number]),
+        ALL('Calendar'),
+        FILTER(
+            'Customer Loyalty History',
+            'Customer Loyalty History'[Enrollment Start of Month] <= CurrentMonth
+                && (
+                    ISBLANK(
+                        'Customer Loyalty History'[Cancellation Start of Month]
                     )
-            )
-        );
+                    || 'Customer Loyalty History'[Cancellation Start of Month] > CurrentMonth
+                )
+        )
+    )
 
 
---------------------------------------------------
--- Cosmetic / display helpers
---------------------------------------------------
+// ============================================================
+// 3. Customer-level measures
+// ============================================================
 
-M_Transparent =
-    "RGBA(255,255,255,0)";
+M_Total CLV =
+SUMX(
+    VALUES('Customer Loyalty History'[Loyalty Number]),
+    CALCULATE(
+        MAX('Customer Loyalty History'[CLV])
+    )
+)
+
+
+M_Avg CLV =
+AVERAGEX(
+    VALUES('Customer Loyalty History'[Loyalty Number]),
+    CALCULATE(
+        MAX('Customer Loyalty History'[CLV])
+    )
+)
+
+
+M_Customer Average Salary =
+AVERAGEX(
+    VALUES('Customer Loyalty History'[Loyalty Number]),
+    CALCULATE(
+        MAX('Customer Loyalty History'[Salary])
+    )
+)
+
+
+// ============================================================
+// 4. Ratios
+// ============================================================
+
+M_Avg Distance per Flight =
+DIVIDE(
+    [M_Total Distance Traveled],
+    [M_Total Flights Booked]
+)
+
+
+M_Redemption Rate =
+DIVIDE(
+    [M_Total Points Redeemed],
+    [M_Total Points Issued],
+    0
+)
+
+
+// ============================================================
+// 5. Fixed-year flight comparison: 2018 versus 2017
+// ============================================================
+
+M_Flights Booked CY =
+CALCULATE(
+    [M_Total Flights Booked],
+    'Calendar'[Year] = 2018
+)
+
+
+M_Flights Booked LY =
+CALCULATE(
+    [M_Total Flights Booked],
+    'Calendar'[Year] = 2017
+)
+
+
+M_Flights Booked YoY % =
+VAR CY =
+    [M_Flights Booked CY]
+VAR LY =
+    [M_Flights Booked LY]
+RETURN
+    DIVIDE(
+        CY - LY,
+        LY
+    )
+
+
+// ============================================================
+// 6. Presentation helpers
+// ============================================================
 
 M_Date Selection =
-    FORMAT ( MIN ( 'Calendar'[Date] ), "MMM/YY" )
-        & " - "
-        & FORMAT ( MAX ( 'Calendar'[Date] ), "MMM/YY" );
+FORMAT(
+    MIN('Calendar'[Date]),
+    "MMM/YY"
+)
+    & " - "
+    & FORMAT(
+        MAX('Calendar'[Date]),
+        "MMM/YY"
+    )
+
+
+M_Flights Booked YOY% Formatted =
+"YOY: " & FORMAT([M_Flights Booked YoY %], "00%")
+
+
+M_Transparent =
+"RGBA(255,255,255,0)"
