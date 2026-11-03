@@ -1,77 +1,79 @@
-## Customer Flight Activity (fact, grain: loyalty member × flight month)
+# Airline data dictionary
 
-| Column                      | Type         | Description                                                      |
-|-----------------------------|--------------|------------------------------------------------------------------|
-| Loyalty Number              | Text         | Unique identifier of the loyalty program member                  |
-| Total Flights               | Whole number | Number of flights taken in the given month                       |
-| Distance                    | Whole number | Total distance flown in the given month                          |
-| Points Accumulated          | Whole number | Loyalty points earned in the given month                         |
-| Points Redeemed             | Whole number | Loyalty points redeemed in the given month                       |
-| Dollar Cost Points Redeemed | Currency     | Cost to the airline for the points redeemed in the given month   |
-| Flight Booked Start of Month| Date         | First day of the booking month (used to link to the Calendar)    |
+Field and measure definitions for the Airline report, based on its model diagram and supplied DAX. Remaining source and model checks are listed in Docs/Validation.md.
 
+## Customer Flight Activity
 
-## Customer Loyalty History (dimension, grain: one row per loyalty member)
+Documented grain: loyalty member × flight month. Test uniqueness before relying on that grain; duplicate member-month records have not been ruled out.
 
-| Column                    | Type         | Description                                                       |
-|---------------------------|--------------|-------------------------------------------------------------------|
-| Loyalty Number            | Text         | Key – unique loyalty member identifier                            |
-| Country                   | Text         | Member country of residence                                       |
-| Province                  | Text         | Member state/province                                             |
-| City                      | Text         | Member city                                                       |
-| Postal Code               | Text         | Postal/ZIP code                                                   |
-| Gender                    | Text         | Gender of the member                                              |
-| Education                 | Text         | Highest education level (High School, College, Bachelor, etc.)    |
-| Salary                    | Currency     | Annual salary band/estimate for the member                        |
-| Marital Status            | Text         | Marital status (Single, Married, etc.)                            |
-| Loyalty Card              | Text         | Loyalty tier (e.g., Star, Nova, Aurora)                           |
-| CLV                       | Currency     | Customer Lifetime Value for the member                            |
-| Enrollment Type           | Text         | Loyalty plan type (e.g., Standard, Promotion)                     |
-| Enrollment Start of Month | Date         | Month when the member enrolled in the loyalty program             |
-| Cancellation Start of Month| Date        | Month when the membership was cancelled (if applicable)           |
-| Has Canceled              | Whole number | 1 if member has cancelled, 0 otherwise                            |
-| Country Hierarchy         | Hierarchy    | Navigation hierarchy: Country → Province → City                   |
+| Field | Meaning / limitation |
+|---|---|
+| Loyalty Number | Member identifier; repeats across activity periods. Validate joins against loyalty history. |
+| Total Flights | Source flight-count field summed by the report. “Flights Booked” is the report label; booking versus flown semantics require the original source definition. |
+| Distance | Source distance total. Unit not verified. |
+| Points Accumulated | Points issued/earned in activity records. |
+| Points Redeemed | Points redeemed in activity records. |
+| Dollar Cost Points Redeemed | Monetary redemption-cost field; currency code and valuation method unverified. |
+| Flight Booked Start of Month | Month-start date used by the exported flight-activity measures. Transformation not supplied. |
 
+## Customer Loyalty History
 
-## Calendar (dimension)
+Intended grain: one record per Loyalty Number. The diagram shows this table on the one side of the activity relationship; source uniqueness is untested.
 
-| Column                | Type         | Description                                                     |
-|-----------------------|--------------|-----------------------------------------------------------------|
-| Date                  | Date         | Calendar date (daily grain)                                     |
-| Start of Year         | Date         | First day of the calendar year for each row                     |
-| Start of Quarter      | Date         | First day of the quarter for each row                           |
-| Start of Month        | Date         | First day of the month for each row                             |
-| Year                  | Whole number | Calendar year                                                   |
-| Month                 | Text         | Month number                                                    |
-| Month Name            | Text         | Full month name (January, February, …)                          |
-| Month Name (Short)    | Text         | Abbreviated month name (Jan, Feb, …)                            |
-| Day Name (Short)      | Text         | Abbreviated day name (Mon, Tue, …)                              |
-| Quarter Number        | Whole number | Quarter of the year (1–4)                                       |
-| Start of Year Hierarchy| Hierarchy   | Year → Quarter → Month (used for drill-down in visuals)         |
+| Fields | Meaning / limitation |
+|---|---|
+| Loyalty Number | Intended customer key. |
+| Country, Province, City, Postal Code | Customer geography; not flight origin/destination. |
+| Gender, Education, Marital Status | Customer attributes for descriptive grouping. |
+| Salary | Source salary attribute; units, missing-value treatment, and negative/zero values require inspection. |
+| Loyalty Card | Tier label; observed Star, Nova, Aurora. Completeness unverified. |
+| CLV | Source customer lifetime value attribute; calculation methodology and currency unverified. Not period revenue. |
+| Enrollment Type | Enrollment category, including Standard and 2018 Promotion in the report. |
+| Enrollment Start of Month | Derived enrollment month. |
+| Cancellation Start of Month | Derived cancellation month; missing values are treated as not cancelled by the active-membership expression. |
+| Has Canceled | Intended 1/0 cancellation indicator; generation logic not included. |
+| Country Hierarchy | Country → Province → City hierarchy. |
 
+## Calendar and measures table
 
-## Core Measures (selection)
+Calendar contains Date, Year, Quarter Number, Month, Month Name, Month Name (Short), Day Name (Short), Start of Month, Start of Quarter, and Start of Year. Daily continuity, date-table marking, coverage, and exact relationship endpoints are unverified. The measures table is disconnected and organizes expressions.
 
-| Measure                         | Definition (plain)                                                           |
-|---------------------------------|------------------------------------------------------------------------------|
-| M_Total Flights Booked          | Total number of flights booked (using the booking month relationship)        |
-| M_Total Points Issued           | Total loyalty points accumulated by members                                  |
-| M_Total Points Redeemed         | Total loyalty points redeemed by members                                     |
-| M_Total Distance Traveled       | Total distance flown by loyalty members                                      |
-| M_Total Members                 | Distinct count of loyalty members with flight activity in the selected period|
-| M_Total Loyalty Cancellations   | Total number of cancelled loyalty memberships                                |
-| M_Total CLV                     | Sum of Customer Lifetime Value across all members                            |
-| M_Loyalty Member Enrollments    | Members enrolled (Total Members − Total Cancellations)                       |
-| M_Net Loyalty Members           | Net active loyalty members after cancellations                               |
-| M_Members (Flew in Period)      | Distinct members who actually flew (Total Flights > 0) in the selected period|
-| M_Redemption Rate               | Points Redeemed / Points Issued                                              |
-| M_Loyal Members Sparkline       | Running count of active members over time, ignoring future dates             |
-| M_Flights Booked CY             | Flights booked in the current year                                           |
-| M_Flights Booked LY             | Flights booked in the previous year                                          |
-| M_Flights Booked YoY %          | Year-over-year % change in flights booked ((CY − LY) / LY)                   |
-| M_Flights Booked YOY% Formatted | Text-formatted version of Flights Booked YoY % (e.g., `YOY: 27%`)            |
-| M_Customer Average Salary       | Average salary per loyalty member                                            |
-| M_Avg CLV                       | Average Customer Lifetime Value per loyalty member                           |
-| M_Avg Distance per Flight       | Average distance traveled per flight                                         |
-| M_Date Selection                | Text showing current date range (e.g., `Jan/17 - Dec/18`)                    |
-| M_Transparent                   | Helper measure returning transparent RGBA color for cosmetic formatting      |
+## Metric definitions: distinguish these concepts
+
+| Measure | Exported behavior |
+|---|---|
+| M_Total Flights Booked | SUM of Total Flights using the flight-month relationship. |
+| M_Total Distance Traveled | SUM of Distance using the flight-month relationship. |
+| M_Total Points Issued / Redeemed | SUM of the corresponding activity field using the flight-month relationship. |
+| M_Total Dollar Cost Points Redeemed | SUM of redemption cost with the flight-month relationship. |
+| M_Total Members | DISTINCTCOUNT of activity-table Loyalty Number; no positive-flight condition. Counts members with rows, not necessarily members who flew or active memberships at period end. |
+| M_Members (Flew in Period) | Distinct activity members with Total Flights > 0 under the flight-month relationship. |
+| M_Total Loyalty Cancellations | SUM of Has Canceled with the cancellation-month relationship. Requires validated flags and customer grain. |
+| M_Loyalty Member Enrollments | Currently Total Members − Total Loyalty Cancellations. This does not count enrollment events. |
+| M_Net Loyalty Members | Currently the preceding measure − Total Loyalty Cancellations, subtracting cancellations twice from Total Members. Not a validated net-membership measure. |
+| M_Loyal Members Sparkline | Counts loyalty-history members enrolled by the selected month and not cancelled by that month, removes Calendar filters, retains other context. Cancellation month is excluded via `Cancellation > CurrentMonth`. Remaining relationship/filter behavior must be tested. |
+| M_Total CLV | Iterates distinct visible loyalty numbers and sums MAX(CLV) per member. Avoids repeating a value across duplicate rows but can mask conflicting CLV values; time behavior depends on relationships/context. |
+| M_Customer Average Salary | Averages MAX(Salary) per visible loyalty number. Does not explicitly remove invalid salary values. |
+| M_Redemption Rate | Redeemed / Issued with 0 fallback. Period ratio, not cohort redemption probability; redeemed points may have been earned earlier. |
+| M_Flights Booked YoY % | (CY − LY) / LY; CY and LY definitions are absent from the supplied export. |
+| M_Date Selection | Displays MIN/MAX Calendar dates; does not prove all intervening periods have activity. |
+| M_Transparent | Returns the string `RGBA(255,255,255,0)` for transparent-color formatting. |
+| M_Flights Booked YOY% Formatted | Prefixes the formatted percentage with `YOY: ` using `FORMAT([M_Flights Booked YoY %], "00%")`. A blank ratio can leave a label without a percentage. |
+
+## Display helper expressions
+
+Both helpers below are present in the supplied Airline DAX file:
+
+```dax
+M_Transparent =
+    "RGBA(255,255,255,0)"
+
+M_Date Selection =
+    FORMAT(MIN('Calendar'[Date]), "MMM/YY")
+        & " - "
+        & FORMAT(MAX('Calendar'[Date]), "MMM/YY")
+```
+
+M_Date Selection describes the selected Calendar range, such as `Jan/17 - Dec/18`. It does not count activity months. M_Transparent is a color string, unlike the numeric `Transparent = 0` expression supplied in the Sales project.
+
+M_Avg CLV and M_Avg Distance per Flight appear in documentation/model but have no definitions in the supplied file. The Active Members card's binding is unverified. Do not use one membership concept as a substitute for another.

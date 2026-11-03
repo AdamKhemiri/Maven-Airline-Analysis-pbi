@@ -1,125 +1,80 @@
-# Maven Airline Report – Power BI
+# Maven Airline Loyalty Analysis — Power BI
 
-Interactive **airline loyalty** report built in Power BI, covering **Jan 2017 – Dec 2018**.  
-The focus is on **clean modeling**, **clear business KPIs**, and an **app-like UX** with drillthrough and tooltips.
+**How does flight activity change across seasons and loyalty tiers?**
 
----
-## 🔗 Report Access
+Flight activity increased from 223,262 in 2017 to 285,546 in 2018. July was the busiest month in both years, while Star led the three displayed loyalty tiers in total flights. This report explores those patterns through time, location, customer profile, and loyalty views.
 
-- **Live report:** [https://app.powerbi.com/view?r=eyJrIjoiMmVlM2ZlNTctYjU4MS00OTAxLTg4MmUtYWNkNjg1Y2Q3MGYzIiwidCI6ImIyZDQ1OTA3LTUwOWItNDQ5Ni05YmQzLTVhNjBjN2YwZjM4MCIsImMiOjN9]
+[Live dashboard](https://app.powerbi.com/view?r=eyJrIjoiMmVlM2ZlNTctYjU4MS00OTAxLTg4MmUtYWNkNjg1Y2Q3MGYzIiwidCI6ImIyZDQ1OTA3LTUwOWItNDQ5Ni05YmQzLTVhNjBjN2YwZjM4MCIsImMiOjN9) · [Data dictionary](Data_Dictionary.md) · [Model](Model/README.md) · [DAX documentation](Dax%20Measures/README.md) · [Validation notes](Docs/Validation.md)
 
----
+## Project scope
 
-## **1. Overview**
+- **Period:** January 2017–December 2018.
+- **Data tables:** Customer Flight Activity and Customer Loyalty History, supported by Calendar.
+- **Reporting perspectives:** time, province, education, and loyalty tier.
+- **Tools:** Power BI, DAX, and data modeling.
 
-This report helps stakeholders answer:
+The report combines flight activity with customer attributes to compare flights, distance, points, membership, and customer lifetime value. The model separates activity records from customer history and uses different date relationships for activity and cancellation measures.
 
-- **Executives:** Are flights, members, distance, points, and CLV trending in the right direction?
-- **Loyalty / Marketing:** Which geographies, tiers, and customer profiles are driving value?
-- **Analysts:** Where should we drill down (period, location, profile) to explain spikes or drops?
+The repository includes the report screenshots, model diagram, and DAX expressions. Dataset attribution and preparation details remain to be added; see the validation notes.
 
-The main landing page gives a high-level view; deeper pages and tooltips provide detail only when needed.
+## Key findings
 
----
+The annual comparison uses the year selector. Tier figures use All years with the enrollment-type filter cleared.
 
-## **2. Report Experience**
+### 1. Flight activity increased by 27.9%
 
-The layout is designed to feel like a small app:
+The report shows **223,262 flights in 2017** and **285,546 in 2018**—an increase of **62,284 flights**. Together, the annual totals reconcile to the **508,808** full-period card.
 
-- **Left navigation**  
-  - **Period** – Time-based trends (landing page)  
-  - **Location** – Performance by province/city  
-  - **Profile** – Demographic breakdowns (education, salary, gender, etc.)  
-  - **Loyalty** – Enrolments, cancellations, net members  
-  - **Export** – Detailed table for ad-hoc analysis / export
+**Next action:** compare monthly and cohort contributions to identify where the increase occurred. This calculation describes the annual change; it does not attribute the increase to the 2018 promotion.
 
-- **Top bar**
-  - Year slicer (**All / 2017 / 2018**)  
-  - Buttons for **Promotion vs Standard** enrollment type  
-  - Author badge: *“By Adam Khemiri”*
+### 2. July's peak grew faster than the annual total
 
-- **KPI row (Period page)**
-  - Flights Booked, Active Members, Distance Traveled, Points Issued, Points Redeemed, Customer Lifetime Value  
-  - Each card uses a **sparkline** for quick trend and a **tooltip page** for extra context (e.g., top 5 cities for a selected month).
+July flight activity rose from **26,312 in 2017** to **37,936 in 2018**, an increase of **44.2%**, compared with **27.9%** for the year overall. July was the busiest month in both displayed years.
 
-- **Drillthrough & tooltips**
-  - Right-click on a period chart → **Drill through** to detailed pages (Flights, Members, Distance, Points Issued/Redeemed, CLV).  
-  - Tooltips show focused summaries without cluttering the main canvas.
+**Next action:** examine which customer groups contributed to the summer peak and use that analysis to plan seasonal loyalty communications. Two years of activity provide a starting point, rather than a complete demand forecast.
 
----
+![Flight activity and other measures over time](Docs/Screenshots/01-Period.png)
 
-## **3. Data Model**
+### 3. Star leads the displayed loyalty tiers in flight volume
 
-Star-schema model with one fact table, one main dimension, and a date dimension:
+The loyalty view shows **212,596 flights for Star**, **158,810 for Nova**, and **96,453 for Aurora**. These figures establish the ranking within the chart, but they sum to **467,859**, below the **508,808** headline total. Tier shares of the overall total are therefore excluded from this analysis until the difference is resolved.
 
-- **Calendar** (dimension)  
-  Daily date table with **Year, Quarter, Month, Start of Month, Start of Quarter, Start of Year**, plus a **Year → Quarter → Month** hierarchy.
+**Next action:** reconcile the chart and headline, then compare flights per member using a consistent member definition. A larger total alone does not establish stronger engagement.
 
-- **Customer Flight Activity** (fact – grain: **loyalty member × flight month**)  
-  Holds **Total Flights, Distance, Points Accumulated / Redeemed, Dollar Cost of Points Redeemed**, and **Flight Booked Start of Month** for date linking.
+[View the loyalty-tier comparison](Docs/Screenshots/04-Loyalty.png)
 
-- **Customer Loyalty History** (dimension – grain: **one row per loyalty member**)  
-  Stores **location (Country/Province/City), demographics (Education, Salary, Gender, Marital Status), Loyalty Card tier, CLV, Enrollment Type**, and **Enrollment / Cancellation dates** plus a **Has Canceled** flag.
+## Model and report design
 
-- **Measures Table** (utility)  
-  A disconnected table that contains all explicit measures used in the report.
+- **Activity measures:** flights, distance, issued points, redeemed points, and redemption cost use the flight-month relationship.
+- **Member measures:** separate expressions address members with activity rows, members who flew, cancellations, and active-membership history.
+- **Customer-level calculations:** CLV and average salary iterate over distinct loyalty numbers.
+- **Navigation:** Period, Location, Profile, and Loyalty views, with year and enrollment-type selections.
+- **Detail views:** six drill-through destinations and saved tooltip designs support closer inspection.
+- **Display helpers:** M_Date Selection produces the reporting-period label; M_Transparent returns a transparent color; the formatted YoY measure supplies the badge text.
 
-Key modeling choices:
+[Model diagram](Model/README.md) · [Flight drill-through screenshot](Docs/Screenshots/07-Flights-Booked-Drill-Through.png) · [Tooltip example](Docs/Screenshots/13-Flights-Booked-Tooltips.png)
 
-- Use of **USERELATIONSHIP** in measures to work with multiple date fields (booking, enrollment, cancellation).  
-- Consistent grain and clear separation between **activity** (fact) and **customer attributes** (dimension).
+## Validation and limitations
 
-> Full column-level details are in `/docs/Data_Dictionary.md`.
+Year and promotion filters were checked. July 2018's **37,936 flights** carried into the Flights Booked drill-through, and returning preserved the 2018 selection. The annual growth and July comparisons above were calculated directly from displayed totals, independently of the YoY badge.
 
----
+Three calculation questions remain:
 
-## **4. Key Metrics & DAX**
+1. **Tier totals:** the all-year chart is **40,949 flights below** the headline. The cause still needs model-level investigation.
+2. **Membership:** the supplied enrollment expression subtracts cancellations from activity-table member counts, and the net-members expression subtracts them again. These definitions need correction before using enrollment or net-membership findings.
+3. **Customer value:** CLV is a source customer attribute. Its period grouping must be established before interpreting the chart as a change in customer value.
 
-Measures are grouped logically in `/dax/Measures.dax`:
+The [validation record](Docs/Validation.md) separates completed checks from remaining work. Proposed corrections have not been applied to the published report.
 
-- **Activity & value**
-  - `M_Total Flights Booked`, `M_Total Distance Traveled`  
-  - `M_Total Points Issued`, `M_Total Points Redeemed`  
-  - `M_Total Dollar Cost Points Redeemed`, `M_Total CLV`
+## Repository guide
 
-- **Loyalty health**
-  - `M_Total Members`, `M_Total Loyalty Cancellations`  
-  - `M_Loyalty Member Enrollments`, `M_Net Loyalty Members`  
-  - `M_Members (Flew in Period)` – members with actual flight activity
+| File or folder | Contents |
+|---|---|
+| [Data_Dictionary.md](Data_Dictionary.md) | Fields, member definitions, ratios, and display helpers |
+| [Dax Measures](Dax%20Measures/README.md) | Supplied expressions, dependencies, and correction requirements |
+| [Model](Model/README.md) | Relationship diagram and date-filter explanation |
+| [Validation](Docs/Validation.md) | Reconciliation results, interaction checks, and remaining work |
+| Docs/Screenshots | Main report, detail pages, and tooltips |
 
-- **Ratios & time intelligence**
-  - `M_Redemption Rate` (Points Redeemed / Points Issued)  
-  - `M_Flights Booked CY`, `M_Flights Booked LY`, `M_Flights Booked YoY %`  
-  - `M_Loyal Members Sparkline` – active member count over time  
-  - `M_Customer Average Salary`, `M_Avg CLV`, `M_Avg Distance per Flight`  
-  - `M_Date Selection` – dynamic label for the current date range
+The repository contains documentation, DAX expressions, and screenshots. The source files and Power BI file are not included. Current-year and prior-year flight expressions and two average-measure definitions are also missing from the supplied DAX export.
 
-DAX patterns used:
-
-- **CY / LY / YoY%** pattern for trend analysis.  
-- **SUMX / AVERAGEX over VALUES(Loyalty Number)** to aggregate CLV and salary at member level.  
-- **ALL(Calendar)** + enrollment/cancellation windows to compute running active membership.
-
----
-
-## **5. Repository Structure**
-
-Intended structure for this project:
-
-- `/DaxMeasures/Measures.dax` – all measures, organized by section.  
-- `/Docs/Screenshots/` – screenshots of the project used for portfolio.  
-- `/Model/` – screenshot of the model.
-- `/Docs/Data_Dictionary.md` – table and measure documentation.  
-
----
-
-## **6. What This Project Demonstrates**
-
-
-- Ability to design a **clean semantic model** with an appropriate grain and clear relationships.  
-- Use of **DAX best practices** (explicit measures, time intelligence, USERELATIONSHIP, iterators where needed).  
-- Focus on **business-oriented KPIs** (redemption rate, net active members, CLV) instead of only raw metrics.  
-- Skill in building an **app-like Power BI UX**: custom navigation, drillthrough, and tooltips that keep the main page simple but powerful.
-
-# link for the embed report : 
- https://app.powerbi.com/view?r=eyJrIjoiNjA2MTM0M2YtZjJmOC00MzYzLThhYWYtMzJkMzg2ZDZlYjkxIiwidCI6ImIyZDQ1OTA3LTUwOWItNDQ5Ni05YmQzLTVhNjBjN2YwZjM4MCIsImMiOjN9
