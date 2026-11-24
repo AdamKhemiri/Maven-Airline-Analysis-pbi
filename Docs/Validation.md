@@ -33,7 +33,7 @@ The earlier review recorded the following values.
 | 2018 Promotion selected: Flights Booked | 44,877 |
 | 2018 Promotion selected: Active Members card | 924 |
 
-The headline values are report observations. The Active Members card's assigned measure, the distance unit, and the CLV population represented by the card have not been independently confirmed.
+The headline values were recorded from the report. The November 24 source check confirmed the annual and July flight totals. The local report definition assigns the Active Members card to `M_Members (Flew in Period)`; 15,167 distinct members have positive flight activity in the source. The card therefore counts members who flew during the selected period.
 
 The promotion selection describes the selected group. It does not establish a causal effect of the promotion.
 
@@ -49,11 +49,15 @@ The promotion selection describes the selected group. It does not establish a ca
 
 Percentages are rounded to one decimal place.
 
-These calculations use recorded annual and monthly values. They do not establish complete source-data reconciliation or independent execution testing of the DAX measures.
+The same annual and July totals were reproduced by summing `Total Flights` from the source activity CSV for each year and month.
 
 The [Period screenshot](Screenshots/01-Period.png) shows the July peaks and their displayed flight values.
 
 ## Breakdown reconciliation
+
+The November 24 check used the [Maven Analytics source archive](https://mavenanalytics.io/data-playground/airline-loyalty-program) and the visual definitions in the author's Power BI file. The loyalty-tier and education charts each have a **Top 6 Province** visual filter ranked by `M_Total Flights Booked`. The headline card uses the full selection.
+
+To reproduce the comparison, join `Customer Flight Activity.csv` to `Customer Loyalty History.csv` on `Loyalty Number`. All 392,936 activity rows match exactly one of 16,737 customer records. Sum `Total Flights` by province, rank descending, then retain Ontario, British Columbia, Quebec, Alberta, New Brunswick, and Manitoba. Group these rows by loyalty tier or education. The two tables below match the filtered results exactly. Across all provinces the tier totals are 231,051 Star, 172,817 Nova, and 104,940 Aurora.
 
 ### Full-period flights by loyalty tier
 
@@ -68,7 +72,7 @@ The [Loyalty screenshot](Screenshots/04-Loyalty.png) displays:
 | Headline total | 508,808 |
 | Difference | 40,949 |
 
-The chart establishes the ranking of the displayed tiers. Its bars do not reconcile to the headline total in that saved state.
+The other five provinces account for all 40,949 flights outside this visual.
 
 Tier shares of the headline total are excluded from the case-study findings.
 
@@ -89,7 +93,7 @@ The [Profile screenshot](Screenshots/03-Profile.png) displays:
 
 The education and loyalty-tier breakdowns have the same displayed subtotal and headline difference.
 
-This shared difference supports investigating their common measure assignments, customer filtering, and relationship paths. It does not establish a specific cause.
+Applying the same six-province filter reproduces each education bar. Both charts reconcile to 508,808 when the excluded provinces are restored.
 
 ### July flight detail
 
@@ -200,7 +204,7 @@ M_Net Loyalty Members algebraically equals:
 
 The case study therefore does not use these two expressions as evidence of enrollment-event counts or net membership growth.
 
-The Active Members card's assigned measure remains unconfirmed.
+The local report's Active Members card uses the positive-flights measure. The source check reproduced its full-period count.
 
 ## Remaining verification scope
 
@@ -208,12 +212,12 @@ The Active Members card's assigned measure remains unconfirmed.
 |---|---|
 | Visual assignments | Exact measures used by headline cards, breakdown charts, sparklines, detail pages, and tooltips. |
 | Visual filters | Agreement of visual-, page-, report-, and inherited drill-through filters. |
-| Breakdown totals | Explanation of the differences between displayed category totals and headline values. |
+| Breakdown totals | Other date selections and breakdowns beyond the verified full-period tier and education charts. |
 | Relationships | Exact date endpoints, active filtering paths, customer-key coverage, and relationship configuration. |
-| Source quality | Duplicate customer keys, duplicate member-month rows, unmatched loyalty numbers, and missing category values. |
+| Source quality | Business interpretation of repeated member-month records. The source has 389,065 distinct member-months across 392,936 rows. Summing flight activity retains those records. |
 | Membership dates | Enrollment and cancellation transformations, cancellation-flag generation, and cutoff behavior. |
 | CLV | Source methodology, currency, customer population, and date role governing each visual. |
-| Dataset provenance | Original download source, preparation steps, and course or template contributions. |
+| Dataset provenance | Full Power Query preparation history and any report-template contributions. |
 | Full interaction coverage | Remaining detail pages, live custom tooltips, export behavior, mobile layout, and cross-filter combinations. |
 
 ## Business interpretation

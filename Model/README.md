@@ -17,7 +17,7 @@ The model combines customer flight activity with loyalty-history attributes and 
 
 The intended activity-table grain is loyalty member × flight month. The intended customer-table grain is one record per Loyalty Number.
 
-These describe the intended model structure. Source-record uniqueness has not been independently verified against the complete dataset.
+The source customer table contains 16,737 unique loyalty numbers and every activity row matches one of them. Activity has 392,936 rows for 389,065 unique member-months. Aggregate the flight amounts across repeated member-months.
 
 ## Relationships shown in the diagram
 

@@ -10,7 +10,7 @@ The report combines customer flight activity with loyalty-history attributes to 
 
 The activity table contains member-level flight activity by reporting month.
 
-The documented grain is loyalty member × flight month. Uniqueness at that combination has not been independently verified against the complete source data.
+Each source row records a member’s activity for a month. The 392,936 rows span 389,065 distinct member-months. Aggregate all rows when computing flight totals.
 
 | Field | Definition |
 |---|---|
@@ -204,6 +204,6 @@ The measure definitions reflect the 22 expressions supplied from the current Pow
 
 The documentation does not establish completed source-data reconciliation, relationship-key validation, or the measure assignments and filters of every visual.
 
-Saved screenshots show differences between some headline totals and breakdown charts, and between some main-page and tooltip values. Those differences require checking the relevant measures, filters, and date context before assigning a cause.
+The [source reconciliation](Docs/Validation.md#breakdown-reconciliation) explains the tier and education totals through a six-province filter. Main-page and tooltip CLV values still require a population and date-context check.
 
 See the [validation notes](Docs/Validation.md) for recorded values and verification scope.
