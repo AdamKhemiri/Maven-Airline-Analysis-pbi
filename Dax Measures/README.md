@@ -1,6 +1,6 @@
 # Airline DAX documentation
 
-[Measures.DAX](Measures.DAX) documents the 22 measure definitions supplied from the Maven Airline Power BI model, grouped by reporting purpose.
+[Measures.DAX](Measures.DAX) contains the model’s 22 measure definitions, grouped by reporting purpose.
 
 The `M_` prefix is the project's measure-naming convention. The expressions are individual Power BI measure definitions for reference.
 
@@ -114,11 +114,7 @@ The measure file documents calculation expressions. It does not define table rel
 
 ## Validation scope
 
-The supplied expressions resolve the earlier missing definitions for current-year flights, prior-year flights, average CLV, and average distance per flight.
-
-Differences between headline cards, breakdown charts, and saved tooltip views require checking their assigned measures and filter contexts. The expressions alone do not establish the cause of those differences.
-
-See the [validation notes](../Docs/Validation.md) for recorded values and verification scope.
+The source files reproduce the Active Members card when restricted to customers with positive flight activity. They also reproduce the flight totals in the tier and education charts when filtered to the six highest-volume provinces. The customer population and date context of the CLV tooltip still need verification. [Source reconciliation](../Docs/Validation.md#breakdown-reconciliation)
 
 ## Related documentation
 

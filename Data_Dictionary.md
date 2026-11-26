@@ -53,7 +53,7 @@ The model diagram places this table on the one side of its relationship with Cus
 
 Customer geography describes where members are located. It does not establish flight origins or destinations.
 
-The source methodology for CLV, salary units and missing-value treatment, and monetary currency codes are not established by the supplied measure expressions.
+The DAX measures aggregate the customer attributes. The underlying CLV methodology, salary units, currency and treatment of missing salary values remain undocumented here.
 
 ## Calendar
 
@@ -91,7 +91,7 @@ The complete Calendar generation expression, marked-date-table configuration, an
 
 The disconnected Measures Table organizes the report's calculations.
 
-The following 22 definitions match the supplied expressions in [Measures.DAX](Dax%20Measures/Measures.DAX).
+The following 22 definitions correspond to the model expressions in [Measures.DAX](Dax%20Measures/Measures.DAX).
 
 ## Activity measures
 
@@ -128,7 +128,7 @@ Despite its name, `M_Loyalty Member Enrollments` does not count enrollment event
 
 `M_Total Members − 2 × M_Total Loyalty Cancellations`
 
-These definitions document the supplied model expressions. They are not used in the case study as verified enrollment-event counts or net membership growth.
+The Export table labels the net-members measure “Loyal Members.” That column cannot support conclusions about membership growth.
 
 ### Membership sparkline
 
@@ -145,7 +145,7 @@ The expression removes Calendar filters through `ALL(Calendar)`. The resulting p
 
 ### Visual labels
 
-The saved report contains labels such as Members, Active Members, and Loyal Members. The measure assigned to each visual must be identified before treating these labels as interchangeable definitions.
+The Active Members card counts members who flew during the selected period. The Export table includes separate columns for all members in activity records, members who flew, and the “Loyal Members” calculation described above.
 
 ## Customer-level measures
 
@@ -200,10 +200,4 @@ The formatted YoY measure returns text. The underlying numeric comparison measur
 
 ## Documentation scope
 
-The measure definitions reflect the 22 expressions supplied from the current Power BI model.
-
-The documentation does not establish completed source-data reconciliation, relationship-key validation, or the measure assignments and filters of every visual.
-
-The [source reconciliation](Docs/Validation.md#breakdown-reconciliation) explains the tier and education totals through a six-province filter. Main-page and tooltip CLV values still require a population and date-context check.
-
-See the [validation notes](Docs/Validation.md) for recorded values and verification scope.
+Every source activity row matches one of 16,737 distinct customer keys. The full-period flight totals by tier and education reconcile when the same six-province filter is applied to the source CSVs and the report. Main-page and tooltip CLV values still require a population and date-context check. [Source reconciliation](Docs/Validation.md#breakdown-reconciliation)

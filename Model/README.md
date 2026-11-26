@@ -31,7 +31,7 @@ The diagram shows:
 
 The diagram does not expose the exact column endpoints of every relationship.
 
-The supplied DAX expressions identify the flight-month and cancellation-month relationships used by the measures. The endpoint of the active Calendar-to-history relationship is not confirmed by the available diagram.
+The DAX expressions identify the flight-month and cancellation-month relationships used by the measures. The diagram leaves the endpoint of the active Calendar-to-history relationship unspecified.
 
 ## Flight-activity date role
 
@@ -42,3 +42,6 @@ USERELATIONSHIP(
     'Calendar'[Date],
     'Customer Flight Activity'[Flight Booked Start of Month]
 )
+```
+
+This relationship places each flight in the month recorded in the activity file. The cancellation measure uses cancellation month to count members leaving the program.

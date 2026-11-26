@@ -2,6 +2,8 @@
 
 **Flights rose 27.9% in 2018.** July was the busiest month in both years and grew 44.2%. The report explores the timing and geographic distribution of activity for Northern Lights Air, a fictional Canadian airline.
 
+**Reading the membership figures.** Across both years, **15,167 of 16,737 members** took at least one flight. The report’s Active Members card counts those flyers. The Export table’s “Loyal Members” column subtracts cancellations twice, so it cannot measure membership growth. [Membership calculations](Docs/Validation.md#membership-calculation-interpretation)
+
 [Live Power BI report](https://app.powerbi.com/view?r=eyJrIjoiMmVlM2ZlNTctYjU4MS00OTAxLTg4MmUtYWNkNjg1Y2Q3MGYzIiwidCI6ImIyZDQ1OTA3LTUwOWItNDQ5Ni05YmQzLTVhNjBjN2YwZjM4MCIsImMiOjN9) · [Source dataset](https://mavenanalytics.io/data-playground/airline-loyalty-program) · [Validation notes](Docs/Validation.md)
 
 ## When did flight activity grow?
@@ -27,6 +29,6 @@ The other five provinces account for **40,949 flights**. Star leads in both view
 
 The report combines monthly flight activity, customer loyalty history, and a calendar. Power BI pages support drill-through by time, location, customer profile, and tier. DAX measures use distinct date roles for flight activity, cancellations, and membership cutoffs.
 
-The source contains **16,737 distinct loyalty members**. Across the full two years, **15,167** took at least one flight. Enrollment events, members who flew, and members active at a cutoff answer different questions. The published net-members expression subtracts cancellations twice, so I exclude it from membership-growth conclusions. Customer lifetime value is a supplied customer attribute.
+Customer lifetime value comes from the source customer file. The report aggregates that value across the members visible under each filter.
 
 [Model diagram and relationships](Model/README.md) · [DAX expressions](Dax%20Measures/Measures.DAX) · [Data dictionary](Data_Dictionary.md) · [Report screenshots](Docs/Screenshots)

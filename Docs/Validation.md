@@ -1,22 +1,17 @@
 # Airline validation notes
 
-This document records the evidence supporting the Maven Airline case study, the scope of the checks performed, and relevant interpretation limits.
+The two source CSVs reproduce the 508,808 flights on the headline card. The same records reproduce 467,859 flights when the tier chart’s province filter is applied.
 
 [Project overview](../README.md) · [Data dictionary](../Data_Dictionary.md) · [DAX documentation](../Dax%20Measures/README.md) · [Model explanation](../Model/README.md)
 
-## Review scope
+## Evidence and dates
 
-The November 2, 2026 review recorded live report interactions and examined the available documentation, DAX expressions, model diagram, and saved screenshots.
-
-The November 3, 2026 documentation review inspected all 18 saved report screenshots, the model diagram, and the repository documents. The report author subsequently supplied 22 current measure definitions.
-
-The documentation review did not repeat the earlier live interaction checks. No complete source dataset, PBIX, or visual-field assignment metadata was inspected.
-
-Saved screenshots represent particular report states. Differences between screenshots must be interpreted alongside their displayed dates, selections, and visual configurations.
+- November 2–3, 2026. Live report interactions, 18 saved report screenshots, model diagram and 22 DAX definitions.
+- November 24–25, 2026. The source activity and customer files establish annual and July flight totals, customer-key coverage and member counts. The local Power BI report file identifies the tier and education filters, the Active Members measure and the “Loyal Members” column in the Export table.
 
 ## Recorded headline values
 
-The earlier review recorded the following values.
+The published report displayed these values under the selections indicated.
 
 | Context | Recorded value |
 |---|---:|
@@ -55,7 +50,7 @@ The [Period screenshot](Screenshots/01-Period.png) shows the July peaks and thei
 
 ## Breakdown reconciliation
 
-The November 24 check used the [Maven Analytics source archive](https://mavenanalytics.io/data-playground/airline-loyalty-program) and the visual definitions in the author's Power BI file. The loyalty-tier and education charts each have a **Top 6 Province** visual filter ranked by `M_Total Flights Booked`. The headline card uses the full selection.
+The [Maven Analytics source archive](https://mavenanalytics.io/data-playground/airline-loyalty-program) contains the activity and customer files. In the Power BI report, the loyalty-tier and education charts each have a **Top 6 Province** visual filter ranked by `M_Total Flights Booked`. The headline card uses the full selection.
 
 To reproduce the comparison, join `Customer Flight Activity.csv` to `Customer Loyalty History.csv` on `Loyalty Number`. All 392,936 activity rows match exactly one of 16,737 customer records. Sum `Total Flights` by province, rank descending, then retain Ontario, British Columbia, Quebec, Alberta, New Brunswick, and Manitoba. Group these rows by loyalty tier or education. The two tables below match the filtered results exactly. Across all provinces the tier totals are 231,051 Star, 172,817 Nova, and 104,940 Aurora.
 
@@ -108,7 +103,7 @@ The saved [Flights Booked drill-through screenshot](Screenshots/07-Flights-Booke
 | Period total | 26,312 |
 | Difference | 2,162 |
 
-The earlier live review separately recorded July 2018:
+The live drill-through showed these values for July 2018.
 
 | Item | Flights |
 |---|---:|
@@ -118,8 +113,6 @@ The earlier live review separately recorded July 2018:
 | Sum of displayed tiers | 35,083 |
 | Period total | 37,936 |
 | Difference | 2,853 |
-
-The July 2017 saved screenshot and the July 2018 live-review record represent different periods.
 
 ### Membership displays
 
@@ -149,7 +142,7 @@ These observations require checking the customer population, date context, and m
 
 ## Recorded interaction checks
 
-The following results were recorded during the November 2, 2026 live review.
+These interactions were tested in the published report on November 2, 2026.
 
 | Check | Recorded result |
 |---|---|
@@ -166,26 +159,9 @@ The current expressions clarify that the YoY measure explicitly compares 2018 wi
 
 Dedicated custom tooltip behavior and the other five drill-through destinations were not individually exercised during that live review. Export behavior, mobile layout, and all cross-filter combinations were not tested.
 
-The subsequent screenshot review inspected their saved appearance, not their live interactions.
-
-## DAX documentation alignment
-
-The report author supplied 22 current measure definitions.
-
-These include the four expressions absent from the earlier repository export:
-
-- M_Flights Booked CY
-- M_Flights Booked LY
-- M_Avg CLV
-- M_Avg Distance per Flight
-
-The current-year and prior-year flight measures explicitly select 2018 and 2017. They are fixed-year expressions rather than dynamically selected current and previous years.
-
-The repository reference groups and formats the supplied expressions without changing their calculation behavior. This documentation update does not modify the published report.
-
 ## Membership calculation interpretation
 
-The supplied expressions distinguish several membership concepts:
+The [DAX reference](../Dax%20Measures/Measures.DAX) documents 22 expressions, including six definitions related to membership.
 
 | Measure | Current behavior |
 |---|---|
@@ -202,7 +178,7 @@ M_Net Loyalty Members algebraically equals:
 
 `M_Total Members − 2 × M_Total Loyalty Cancellations`
 
-The case study therefore does not use these two expressions as evidence of enrollment-event counts or net membership growth.
+In the local Power BI report, the Export table assigns this measure to its “Loyal Members” column. This double subtraction prevents that column from measuring membership growth.
 
 The local report's Active Members card uses the positive-flights measure. The source check reproduced its full-period count.
 
@@ -210,14 +186,14 @@ The local report's Active Members card uses the positive-flights measure. The so
 
 | Area | Verification not established |
 |---|---|
-| Visual assignments | Exact measures used by headline cards, breakdown charts, sparklines, detail pages, and tooltips. |
-| Visual filters | Agreement of visual-, page-, report-, and inherited drill-through filters. |
+| Visual assignments | Assignments beyond the checked Active Members card, Export membership column and full-period tier and education charts. |
+| Visual filters | Filter combinations beyond the six-province checks and recorded live interactions. |
 | Breakdown totals | Other date selections and breakdowns beyond the verified full-period tier and education charts. |
-| Relationships | Exact date endpoints, active filtering paths, customer-key coverage, and relationship configuration. |
+| Relationships | Exact date endpoints and active filtering paths. Customer keys are unique and every source activity row matches one customer. |
 | Source quality | Business interpretation of repeated member-month records. The source has 389,065 distinct member-months across 392,936 rows. Summing flight activity retains those records. |
 | Membership dates | Enrollment and cancellation transformations, cancellation-flag generation, and cutoff behavior. |
 | CLV | Source methodology, currency, customer population, and date role governing each visual. |
-| Dataset provenance | Full Power Query preparation history and any report-template contributions. |
+| Project materials | The source CSVs come from Maven Analytics. The repository does not establish the full Power Query transformation history or the origin of every report design asset. |
 | Full interaction coverage | Remaining detail pages, live custom tooltips, export behavior, mobile layout, and cross-filter combinations. |
 
 ## Business interpretation
